@@ -207,7 +207,7 @@ def nextGen():
     generation_text.set(str(f'generation: {generation_counter.get()}'))
     print('current generation:', generation_counter.get())
     temperature_list.append(avg_temp / (N ** 2))
-    pollution_list.append((pollution_counter / N ** 2)*100)
+    pollution_list.append((pollution_counter / N ** 2) * 100)
     updateCellArray()
 
 
@@ -243,7 +243,6 @@ def getCellInfo(cell):
     rainLabel.grid(column=0, row=6)
     pollutionLabel = Label(infoLayer, text='pollution:')
     pollutionLabel.grid(column=0, row=7)
-
 
     scaleVar = IntVar()
     scaleVar.set(cell.temperature)
@@ -336,9 +335,8 @@ for i in range(0, N):
         if newCell.pollution is Pollution.POLLUTED:
             pollution_counter += 1
 
-
 temperature_list.append(avg_temp / (N ** 2))
-pollution_list.append((pollution_counter / N ** 2)*100)
+pollution_list.append((pollution_counter / N ** 2) * 100)
 
 Label(root, textvariable=generation_text).grid(column=6, row=N, columnspan=6)
 btn_next = Button(root, text='next generation', command=nextGen).grid(column=2, row=N, columnspan=6)
