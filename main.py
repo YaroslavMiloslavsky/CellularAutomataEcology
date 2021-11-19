@@ -89,6 +89,8 @@ def checkTemperatureRuleSet(cell, l, k):
     upperNeighbour = cellArray[l][k - 1] if isLegit(l, k - 1) else cellArray[l][N - 1]
     lowerNeighbour = cellArray[l][k + 1] if isLegit(l, k + 1) else cellArray[l][0]
 
+    if cell.pollution is Pollution.NONE and cell.temperature > 20:
+        changeHealth(cell, temp=-0.5)
     # If the cell is polluted, it will increase in temperature
     if cell.pollution is Pollution.POLLUTED:
         changeHealth(cell, temp=2)
@@ -102,9 +104,11 @@ def checkTemperatureRuleSet(cell, l, k):
     elif lowerNeighbour.pollution is Pollution.POLLUTED and cell.temperature < 31:
         changeHealth(cell, temp=1)
 
-    # if rightNeighbour.landType is LandType.SEA or leftNeighbour.landType is LandType.SEA or upperNeighbour.landType is LandType.SEA or lowerNeighbour.landType is LandType.SEA:
-    #     if cell.temperature > 15:
-    #         changeHealth(cell, temp=-2)
+    if cell.altitude is Altitude.HIGH and cell.temperature > 15:
+        changeHealth(cell, temp=-1)
+    elif cell.altitude is Altitude.HIGH and cell.temperature > 15:
+        changeHealth(cell, temp=-2)
+
     cell.evaluateLandType()
 
 
@@ -162,6 +166,18 @@ def checkPollutionRuleSet(cell, l, k):
     upperNeighbour = cellArray[l][k - 1] if isLegit(l, k - 1) else cellArray[l][N - 1]
     lowerNeighbour = cellArray[l][k + 1] if isLegit(l, k + 1) else cellArray[l][0]
 
+    if rightNeighbour.altitude is Altitude.HIGH and rightNeighbour.pollution is Pollution.POLLUTED:
+        cell.pollution = Pollution.POLLUTED
+        rightNeighbour.pollution = Pollution.NONE
+    if leftNeighbour.altitude is Altitude.HIGH and leftNeighbour.pollution is Pollution.POLLUTED:
+        cell.pollution = Pollution.POLLUTED
+        leftNeighbour.pollution = Pollution.NONE
+    if upperNeighbour.altitude is Altitude.HIGH and upperNeighbour.pollution is Pollution.POLLUTED:
+        cell.pollution = Pollution.POLLUTED
+        upperNeighbour.pollution = Pollution.NONE
+    if lowerNeighbour.altitude is Altitude.HIGH and lowerNeighbour.pollution is Pollution.POLLUTED:
+        cell.pollution = Pollution.POLLUTED
+        lowerNeighbour.pollution = Pollution.NONE
     cell.evaluateLandType()
 
 
@@ -228,11 +244,6 @@ def getCellInfo(cell):
     pollutionLabel = Label(infoLayer, text='pollution:')
     pollutionLabel.grid(column=0, row=7)
 
-    # scaleVar = IntVar()
-    # scaleVar.set(cell.temperature)
-    # tempValue = Scale(infoLayer, from_=-40, to=60, orient=HORIZONTAL, width=7, variable=scaleVar)
-    # # tempValue.set(cell.temperature)
-    # tempValue.grid(column=1, row=0)
 
     scaleVar = IntVar()
     scaleVar.set(cell.temperature)
