@@ -22,7 +22,7 @@ class Cell:
             self.temperature = random.randint(15, 25)
             self.pollution = Pollution.NONE
             self.altitude = random.choice(list(Altitude))
-            if random.randint(0, 100) > 50:
+            if random.randint(0, 100) > 80:
                 self.clouds = Clouds.YES
         elif landType is LandType.ICE:
             self.temperature = -40  # ICE must be the same value otherwise it will melt
@@ -59,6 +59,8 @@ class Cell:
     def evaluateHealth(self, temp):
         if self.landType is LandType.SEA:
             return cellHealth['water']
+        if self.rain is Rain.YES:
+            return cellHealth['rain']
         if temp < 0:
             return cellHealth['cold']
         elif 10 <= temp < 30:
@@ -67,6 +69,7 @@ class Cell:
             return cellHealth['warm']
         elif temp >= 35:
             return cellHealth['hot']
+
 
     def evaluateLandType(self):
         if self.landType is LandType.ICE:

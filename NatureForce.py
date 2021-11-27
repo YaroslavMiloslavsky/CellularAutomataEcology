@@ -40,4 +40,4 @@ class Pollution(Enum):
 
 # Temperature
 cellHealth = {'cold': 'white', 'normal': 'lightgreen', 'water': 'blue', 'warm': 'yellow', 'hot': 'red',
-              'mountain': 'green', 'clouds': 'lightgray'}
+              'mountain': 'green', 'rain':'lightblue'}
