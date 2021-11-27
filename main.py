@@ -167,7 +167,6 @@ def checkCloudsRuleSet(cell, l, k):
         cell.clouds = Clouds.NO
 
 
-
 def checkPollutionRuleSet(cell, l, k):
     rightNeighbour = cellArray[l + 1][k] if isLegit(l + 1, k) else cellArray[0][k]
     leftNeighbour = cellArray[l - 1][k] if isLegit(l - 1, k) else cellArray[N - 1][k]
@@ -406,9 +405,9 @@ except ZeroDivisionError:
 plt.scatter(x=list(range(0, generation_counter.get() + 1)), y=normalized_pollution_list)
 plt.title('normalized pollution')
 plt.show()
-print('-'*50)
+print('-' * 50)
 # Rain
-avgRainThisRun = round(sum(rain_amount_list)/len(rain_amount_list))
+avgRainThisRun = round(sum(rain_amount_list) / len(rain_amount_list))
 rainDeviation = round(statistics.stdev(rain_amount_list), ndigits=3)
 print(f'avg rain amount in cells {avgRainThisRun}')
 print(
@@ -420,7 +419,7 @@ normalized_rain_list = [
 plt.scatter(x=list(range(0, generation_counter.get() + 1)), y=normalized_rain_list)
 plt.title('normalized rain graph')
 plt.show()
-print('-'*50)
+print('-' * 50)
 # Average Temperature in cities
 avgTemperatureInCities = round(sum(temperature_in_cities_list) / len(temperature_in_cities_list))
 temperatureInCitiesDeviation = round(np.std(temperature_in_cities_list))
@@ -434,7 +433,7 @@ normalized_temperature_cities_list = [
 plt.scatter(x=list(range(0, generation_counter.get() + 1)), y=normalized_temperature_cities_list)
 plt.title('normalized temperature in cities')
 plt.show()
-print('-'*50)
+print('-' * 50)
 # Temperature Data
 avgTemperatureThisRun = round(sum(temperature_list) / len(temperature_list), ndigits=3)
 temperatureDeviation = round(statistics.stdev(temperature_list), ndigits=3)
@@ -446,5 +445,3 @@ normalized_temperature_list = [(x - min(temperature_list)) / (max(temperature_li
 plt.scatter(x=list(range(0, generation_counter.get() + 1)), y=normalized_temperature_list)
 plt.title('normalized temperature')
 plt.show()
-
-

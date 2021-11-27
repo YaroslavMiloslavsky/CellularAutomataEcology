@@ -70,7 +70,6 @@ class Cell:
         elif temp >= 35:
             return cellHealth['hot']
 
-
     def evaluateLandType(self):
         if self.landType is LandType.ICE:
             if self.temperature > 0:
@@ -83,8 +82,6 @@ class Cell:
         elif self.landType is LandType.LAND or self.landType is LandType.FOREST:
             if self.temperature < 0:
                 self.landType = LandType.ICE
-
-
 
     def __str__(self):
         return f'landType: {self.landType}, altitude: {self.altitude},' \
