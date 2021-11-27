@@ -17,7 +17,7 @@ class Cell:
             self.temperature = random.randint(23, 32)
             self.pollution = Pollution.POLLUTED
             self.windDirection = random.choice(list(WindDirection))
-            # self.windDirection = WindDirection.NONE
+            self.altitude = Altitude.FLAT
         elif landType is LandType.FOREST:
             self.temperature = random.randint(15, 25)
             self.pollution = Pollution.NONE
@@ -31,12 +31,12 @@ class Cell:
             self.temperature = random.randint(25, 26)
             self.pollution = Pollution.NONE
             self.altitude = random.choice(list(Altitude))
-            if random.randint(0, 100) > 50:
-                self.clouds = Clouds.YES
         elif landType is LandType.SEA:
             self.temperature = random.randint(0, 20)
             self.pollution = Pollution.NONE
             self.windDirection = random.choice(list(WindDirection))
+        if random.randint(0, 100) > 50:
+            self.clouds = Clouds.YES
 
         self.bg = self.evaluateHealth(self.temperature)
 

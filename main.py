@@ -1,4 +1,5 @@
 import math
+import threading
 import statistics
 import numpy as np
 import threading
@@ -11,6 +12,7 @@ import matplotlib.pyplot as plt
 temperature_in_cities_list = []
 temperature_list = []
 pollution_list = []
+rain_amount_list = []
 
 root = Tk()
 root.title('Earth Simulation')
@@ -147,17 +149,22 @@ def checkCloudsRuleSet(cell, l, k):
 
     if rightNeighbour.clouds is Clouds.YES and rightNeighbour.windDirection is WindDirection.WEST:
         cell.clouds = Clouds.YES
+        rightNeighbour.clouds = Clouds.NO
     if leftNeighbour.clouds is Clouds.YES and leftNeighbour.windDirection is WindDirection.EAST:
         cell.clouds = Clouds.YES
+        leftNeighbour.clouds = Clouds.NO
     if upperNeighbour.clouds is Clouds.YES and upperNeighbour.windDirection is WindDirection.SOUTH:
         cell.clouds = Clouds.YES
+        upperNeighbour.clouds = Clouds.NO
     if lowerNeighbour.clouds is Clouds.YES and lowerNeighbour.windDirection is WindDirection.NORTH:
         cell.clouds = Clouds.YES
+        lowerNeighbour.clouds = Clouds.NO
 
-    # If all 4 neighbours have clouds, the cell will have rain
-    if rightNeighbour.clouds is Clouds.YES and leftNeighbour.clouds is Clouds.YES and upperNeighbour.clouds is Clouds.YES and lowerNeighbour.clouds is Clouds.YES:
-        cell.clouds = Clouds.YES
+    # If a cell has clouds the next generation it will have rain
+    if cell.clouds is Clouds.YES:
         cell.rain = Rain.YES
+    if cell.clouds is Clouds.NO:
+        cell.rain = Rain.NO
 
 
 def checkPollutionRuleSet(cell, l, k):
@@ -166,6 +173,8 @@ def checkPollutionRuleSet(cell, l, k):
     upperNeighbour = cellArray[l][k - 1] if isLegit(l, k - 1) else cellArray[l][N - 1]
     lowerNeighbour = cellArray[l][k + 1] if isLegit(l, k + 1) else cellArray[l][0]
 
+    if cell.landType is LandType.CITY:
+        cell.pollution = Pollution.POLLUTED
     if rightNeighbour.altitude is Altitude.HIGH and rightNeighbour.pollution is Pollution.POLLUTED:
         cell.pollution = Pollution.POLLUTED
         rightNeighbour.pollution = Pollution.NONE
@@ -178,6 +187,9 @@ def checkPollutionRuleSet(cell, l, k):
     if lowerNeighbour.altitude is Altitude.HIGH and lowerNeighbour.pollution is Pollution.POLLUTED:
         cell.pollution = Pollution.POLLUTED
         lowerNeighbour.pollution = Pollution.NONE
+
+    if cell.rain is Rain.YES:
+        cell.pollution = Pollution.NONE
     cell.evaluateLandType()
 
 
@@ -189,19 +201,31 @@ def nextGen():
     global generation_text
     global pollution_counter
     global avg_temp_in_cities
-    global cityCounter
+    global city_counter
+    global rain_counter
 
     pollution_counter = 0
     avg_temp = 0
     avg_temp_in_cities = 0
+    rain_counter = 0
+
     # Test to see affect of city on a nearby forest
     for l in range(0, N):
         for k in range(0, N):
             current_cell = cellArray[l][k]
-            checkTemperatureRuleSet(current_cell, l, k)
-            checkWindRuleSet(current_cell, l, k)
-            checkCloudsRuleSet(current_cell, l, k)
-            checkPollutionRuleSet(current_cell, l, k)
+            t1 = threading.Thread(target=checkTemperatureRuleSet, args=(current_cell, l, k))
+            t2 = threading.Thread(target=checkWindRuleSet, args=(current_cell, l, k))
+            t3 = threading.Thread(target=checkCloudsRuleSet, args=(current_cell, l, k))
+            t4 = threading.Thread(target=checkPollutionRuleSet, args=(current_cell, l, k))
+
+            t1.start()
+            t2.start()
+            t3.start()
+            t4.start()
+            t1.join()
+            t2.join()
+            t3.join()
+            t4.join()
 
             cellArray[l][k].evaluateTemperature(current_cell.temperature)
             avg_temp += abs(current_cell.temperature)
@@ -209,13 +233,15 @@ def nextGen():
                 pollution_counter += 1
             if current_cell.landType is LandType.CITY:
                 avg_temp_in_cities += current_cell.temperature
-
+            if current_cell.rain is Rain.YES:
+                rain_counter += 1
     generation_counter.set(generation_counter.get() + 1)
     generation_text.set(str(f'generation: {generation_counter.get()}'))
     print('current generation:', generation_counter.get())
     temperature_list.append(avg_temp / (N ** 2))
     pollution_list.append((pollution_counter / N ** 2) * 100)
-    temperature_in_cities_list.append(avg_temp_in_cities/cityCounter)
+    temperature_in_cities_list.append(avg_temp_in_cities / city_counter)
+    rain_amount_list.append(rain_counter)
     updateCellArray()
 
 
@@ -302,11 +328,12 @@ def getCellInfo(cell):
     infoLayer.mainloop()
 
 
-cityCounter = 0
+city_counter = 0
 land = None
 avg_temp = 0
 avg_temp_in_cities = 0
 pollution_counter = 0
+rain_counter = 0
 for i in range(0, N):
     for j in range(0, N):
         # Parameters
@@ -322,13 +349,13 @@ for i in range(0, N):
             tempList.remove(LandType.ICE)
             if random.randint(0, 100) > 20:
                 tempList.remove(LandType.SEA)
-            if cityCounter > 4:
+            if city_counter > 4:
                 tempList.remove(LandType.CITY)
             land = random.choice(tempList)
             if land == LandType.CITY:
-                cityCounter += 1
+                city_counter += 1
 
-        print(cityCounter)
+        print(city_counter)
 
         newCell = Cell(landType=land)
         btn_text = StringVar()
@@ -345,10 +372,13 @@ for i in range(0, N):
             pollution_counter += 1
         if newCell.landType is LandType.CITY:
             avg_temp_in_cities += newCell.temperature
+        if newCell.rain is Rain.YES:
+            rain_counter += 1
 
 temperature_list.append(avg_temp / (N ** 2))
 pollution_list.append((pollution_counter / N ** 2) * 100)
-temperature_in_cities_list.append((avg_temp_in_cities / cityCounter))
+temperature_in_cities_list.append((avg_temp_in_cities / city_counter))
+rain_amount_list.append(rain_counter)
 
 Label(root, textvariable=generation_text).grid(column=6, row=N, columnspan=6)
 btn_next = Button(root, text='next generation', command=nextGen).grid(column=2, row=N, columnspan=6)
@@ -359,12 +389,16 @@ root.mainloop()
 # Here we write the data to graph logic
 # For data normalization I used z = (x-min(x))/(max(x)-min(x)) to get a scatter between 0 and 1
 
+# Rain
+
+
 # Average Temperature in cities
-avgTemperatureInCities = round(sum(temperature_in_cities_list) / len(temperature_in_cities_list), ndigits=3)
-temperatureInCitiesDeviation = round(statistics.stdev(temperature_list), ndigits=3)
+avgTemperatureInCities = round(sum(temperature_in_cities_list) / len(temperature_in_cities_list))
+temperatureInCitiesDeviation = round(np.std(temperature_in_cities_list))
 print(f'avg temperature in cities overall was {avgTemperatureInCities}')
-print(f'the temperature in cities overall is between {min(temperature_in_cities_list)} and {max(temperature_in_cities_list)}')
-print(f'deviation is {avgTemperatureInCities}')
+print(
+    f'the temperature in cities overall is between {min(temperature_in_cities_list)} and {max(temperature_in_cities_list)}')
+print(f'deviation is {temperatureInCitiesDeviation}')
 normalized_temperature_cities_list = [
     (x - min(temperature_in_cities_list)) / (max(temperature_in_cities_list) - min(temperature_in_cities_list)) for x in
     temperature_in_cities_list]
