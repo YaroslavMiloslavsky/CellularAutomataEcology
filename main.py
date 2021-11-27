@@ -8,6 +8,7 @@ from Cell import Cell
 from NatureForce import LandType, Altitude, WindDirection, Clouds, Rain, Pollution
 import matplotlib.pyplot as plt
 
+temperature_in_cities_list = []
 temperature_list = []
 pollution_list = []
 
@@ -187,8 +188,12 @@ def nextGen():
     global generation_counter
     global generation_text
     global pollution_counter
+    global avg_temp_in_cities
+    global cityCounter
+
     pollution_counter = 0
     avg_temp = 0
+    avg_temp_in_cities = 0
     # Test to see affect of city on a nearby forest
     for l in range(0, N):
         for k in range(0, N):
@@ -202,11 +207,15 @@ def nextGen():
             avg_temp += abs(current_cell.temperature)
             if current_cell.pollution is Pollution.POLLUTED:
                 pollution_counter += 1
+            if current_cell.landType is LandType.CITY:
+                avg_temp_in_cities += current_cell.temperature
+
     generation_counter.set(generation_counter.get() + 1)
     generation_text.set(str(f'generation: {generation_counter.get()}'))
     print('current generation:', generation_counter.get())
     temperature_list.append(avg_temp / (N ** 2))
     pollution_list.append((pollution_counter / N ** 2) * 100)
+    temperature_in_cities_list.append(avg_temp_in_cities/cityCounter)
     updateCellArray()
 
 
@@ -296,6 +305,7 @@ def getCellInfo(cell):
 cityCounter = 0
 land = None
 avg_temp = 0
+avg_temp_in_cities = 0
 pollution_counter = 0
 for i in range(0, N):
     for j in range(0, N):
@@ -333,9 +343,12 @@ for i in range(0, N):
         avg_temp += abs(newCell.temperature)
         if newCell.pollution is Pollution.POLLUTED:
             pollution_counter += 1
+        if newCell.landType is LandType.CITY:
+            avg_temp_in_cities += newCell.temperature
 
 temperature_list.append(avg_temp / (N ** 2))
 pollution_list.append((pollution_counter / N ** 2) * 100)
+temperature_in_cities_list.append((avg_temp_in_cities / cityCounter))
 
 Label(root, textvariable=generation_text).grid(column=6, row=N, columnspan=6)
 btn_next = Button(root, text='next generation', command=nextGen).grid(column=2, row=N, columnspan=6)
@@ -343,7 +356,21 @@ Button(root, text='auto', command=nextGenLoop).grid(column=0, row=N, columnspan=
 
 root.mainloop()
 
+# Here we write the data to graph logic
 # For data normalization I used z = (x-min(x))/(max(x)-min(x)) to get a scatter between 0 and 1
+
+# Average Temperature in cities
+avgTemperatureInCities = round(sum(temperature_in_cities_list) / len(temperature_in_cities_list), ndigits=3)
+temperatureInCitiesDeviation = round(statistics.stdev(temperature_list), ndigits=3)
+print(f'avg temperature in cities overall was {avgTemperatureInCities}')
+print(f'the temperature in cities overall is between {min(temperature_in_cities_list)} and {max(temperature_in_cities_list)}')
+print(f'deviation is {avgTemperatureInCities}')
+normalized_temperature_cities_list = [
+    (x - min(temperature_in_cities_list)) / (max(temperature_in_cities_list) - min(temperature_in_cities_list)) for x in
+    temperature_in_cities_list]
+plt.scatter(x=list(range(0, generation_counter.get() + 1)), y=normalized_temperature_cities_list)
+plt.title('normalized temperature in cities')
+plt.show()
 
 # Temperature Data
 avgTemperatureThisRun = round(sum(temperature_list) / len(temperature_list), ndigits=3)
@@ -369,7 +396,7 @@ try:
     normalized_pollution_list = [(x - min(pollution_list)) / (max(pollution_list) - min(pollution_list)) for x in
                                  pollution_list]
 except ZeroDivisionError:
-    normalized_pollution_list = [x/len(pollution_list) for x in pollution_list]
+    normalized_pollution_list = [x / len(pollution_list) for x in pollution_list]
 plt.scatter(x=list(range(0, generation_counter.get() + 1)), y=normalized_pollution_list)
 plt.title('normalized pollution')
 plt.show()
