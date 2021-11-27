@@ -16,8 +16,8 @@ class Cell:
         if landType is LandType.CITY:
             self.temperature = random.randint(23, 32)
             self.pollution = Pollution.POLLUTED
-            # self.windDirection = random.choice(list(WindDirection))
-            self.windDirection = WindDirection.NONE
+            self.windDirection = random.choice(list(WindDirection))
+            # self.windDirection = WindDirection.NONE
         elif landType is LandType.FOREST:
             self.temperature = random.randint(15, 25)
             self.pollution = Pollution.NONE
