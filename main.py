@@ -103,11 +103,10 @@ def checkTemperatureRuleSet(cell, l, k):
         changeHealth(cell, temp=1)
     elif lowerNeighbour.pollution is Pollution.POLLUTED and cell.temperature < 31:
         changeHealth(cell, temp=1)
-
     if cell.altitude is Altitude.HIGH and cell.temperature > 15:
-        changeHealth(cell, temp=-1)
+        changeHealth(cell, temp=-0.5)
     elif cell.altitude is Altitude.HIGH and cell.temperature > 15:
-        changeHealth(cell, temp=-2)
+        changeHealth(cell, temp=-1)
 
     cell.evaluateLandType()
 
@@ -365,8 +364,12 @@ pollutionDeviation = round(statistics.stdev(pollution_list), ndigits=3)
 print(f'avg pollution was {avgPollutionThisRun}')
 print(f'the pollution percentage is between {min(pollution_list)} and {max(pollution_list)}')
 print(f'deviation is {pollutionDeviation}')
-normalized_pollution_list = [(x - min(pollution_list)) / (max(pollution_list) - min(pollution_list)) for x in
-                             pollution_list]
+normalized_pollution_list = []
+try:
+    normalized_pollution_list = [(x - min(pollution_list)) / (max(pollution_list) - min(pollution_list)) for x in
+                                 pollution_list]
+except ZeroDivisionError:
+    normalized_pollution_list = [x/len(pollution_list) for x in pollution_list]
 plt.scatter(x=list(range(0, generation_counter.get() + 1)), y=normalized_pollution_list)
 plt.title('normalized pollution')
 plt.show()
