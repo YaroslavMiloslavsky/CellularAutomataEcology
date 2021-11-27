@@ -190,6 +190,8 @@ def checkPollutionRuleSet(cell, l, k):
 
     if cell.rain is Rain.YES:
         cell.pollution = Pollution.NONE
+    if cell.pollution is Pollution.POLLUTED:
+        cell.clouds = Clouds.NO
     cell.evaluateLandType()
 
 
@@ -390,7 +392,36 @@ root.mainloop()
 # For data normalization I used z = (x-min(x))/(max(x)-min(x)) to get a scatter between 0 and 1
 
 # Rain
+print(f'rain is {rain_amount_list}')
+avgRainThisRun = round(sum(rain_amount_list)/len(rain_amount_list))
+rainDeviation = round(np.std(rain_amount_list))
+print(f'avg rain amount in cells {avgRainThisRun}')
+print(
+    f'the rain amount is between {min(rain_amount_list)} and {max(rain_amount_list)}')
+print(f'deviation is {rain_amount_list}')
+normalized_rain_list = [
+    (x - min(rain_amount_list)) / (max(rain_amount_list) - min(rain_amount_list)) for x in
+    rain_amount_list]
+plt.scatter(x=list(range(0, generation_counter.get() + 1)), y=normalized_rain_list)
+plt.title('normalized rain graph')
+plt.show()
 
+# Pollution Data
+print(f'polluted cells {pollution_counter} and pollution is {round(pollution_counter / N ** 2, ndigits=3) * 100}%')
+avgPollutionThisRun = round(sum(pollution_list) / len(pollution_list), ndigits=3)
+pollutionDeviation = round(statistics.stdev(pollution_list), ndigits=3)
+print(f'avg pollution was {avgPollutionThisRun}')
+print(f'the pollution percentage is between {min(pollution_list)} and {max(pollution_list)}')
+print(f'deviation is {pollutionDeviation}')
+normalized_pollution_list = []
+try:
+    normalized_pollution_list = [(x - min(pollution_list)) / (max(pollution_list) - min(pollution_list)) for x in
+                                 pollution_list]
+except ZeroDivisionError:
+    normalized_pollution_list = [x / len(pollution_list) for x in pollution_list]
+plt.scatter(x=list(range(0, generation_counter.get() + 1)), y=normalized_pollution_list)
+plt.title('normalized pollution')
+plt.show()
 
 # Average Temperature in cities
 avgTemperatureInCities = round(sum(temperature_in_cities_list) / len(temperature_in_cities_list))
@@ -418,19 +449,4 @@ plt.scatter(x=list(range(0, generation_counter.get() + 1)), y=normalized_tempera
 plt.title('normalized temperature')
 plt.show()
 
-# Pollution Data
-print(f'polluted cells {pollution_counter} and pollution is {round(pollution_counter / N ** 2, ndigits=3) * 100}%')
-avgPollutionThisRun = round(sum(pollution_list) / len(pollution_list), ndigits=3)
-pollutionDeviation = round(statistics.stdev(pollution_list), ndigits=3)
-print(f'avg pollution was {avgPollutionThisRun}')
-print(f'the pollution percentage is between {min(pollution_list)} and {max(pollution_list)}')
-print(f'deviation is {pollutionDeviation}')
-normalized_pollution_list = []
-try:
-    normalized_pollution_list = [(x - min(pollution_list)) / (max(pollution_list) - min(pollution_list)) for x in
-                                 pollution_list]
-except ZeroDivisionError:
-    normalized_pollution_list = [x / len(pollution_list) for x in pollution_list]
-plt.scatter(x=list(range(0, generation_counter.get() + 1)), y=normalized_pollution_list)
-plt.title('normalized pollution')
-plt.show()
+
