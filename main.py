@@ -1,5 +1,3 @@
-import math
-import threading
 import statistics
 import numpy as np
 import threading
@@ -360,7 +358,7 @@ for i in range(0, N):
             if land == LandType.CITY:
                 city_counter += 1
 
-        print(city_counter)
+        # print(city_counter)
 
         newCell = Cell(landType=land)
         btn_text = StringVar()
@@ -371,7 +369,7 @@ for i in range(0, N):
         newBtn.grid(column=i, row=j)
         cellArray[i][j] = newCell
         btnArray[i][j] = newBtn
-        print(cellArray[i][j])
+        # print(cellArray[i][j])
         avg_temp += abs(newCell.temperature)
         if newCell.pollution is Pollution.POLLUTED:
             pollution_counter += 1
@@ -393,21 +391,6 @@ root.mainloop()
 
 # Here we write the data to graph logic
 # For data normalization I used z = (x-min(x))/(max(x)-min(x)) to get a scatter between 0 and 1
-
-# Rain
-avgRainThisRun = round(sum(rain_amount_list)/len(rain_amount_list))
-rainDeviation = round(statistics.stdev(rain_amount_list), ndigits=3)
-print(f'avg rain amount in cells {avgRainThisRun}')
-print(
-    f'the rain amount is between {min(rain_amount_list)} and {max(rain_amount_list)}')
-print(f'deviation is {rainDeviation}')
-normalized_rain_list = [
-    (x - min(rain_amount_list)) / (max(rain_amount_list) - min(rain_amount_list)) for x in
-    rain_amount_list]
-plt.scatter(x=list(range(0, generation_counter.get() + 1)), y=normalized_rain_list)
-plt.title('normalized rain graph')
-plt.show()
-print('-'*50)
 # Pollution Data
 print(f'polluted cells {pollution_counter} and pollution is {round(pollution_counter / N ** 2, ndigits=3) * 100}%')
 avgPollutionThisRun = round(sum(pollution_list) / len(pollution_list), ndigits=3)
@@ -422,6 +405,20 @@ except ZeroDivisionError:
     normalized_pollution_list = [x / len(pollution_list) for x in pollution_list]
 plt.scatter(x=list(range(0, generation_counter.get() + 1)), y=normalized_pollution_list)
 plt.title('normalized pollution')
+plt.show()
+print('-'*50)
+# Rain
+avgRainThisRun = round(sum(rain_amount_list)/len(rain_amount_list))
+rainDeviation = round(statistics.stdev(rain_amount_list), ndigits=3)
+print(f'avg rain amount in cells {avgRainThisRun}')
+print(
+    f'the rain amount is between {min(rain_amount_list)} and {max(rain_amount_list)}')
+print(f'deviation is {rainDeviation}')
+normalized_rain_list = [
+    (x - min(rain_amount_list)) / (max(rain_amount_list) - min(rain_amount_list)) for x in
+    rain_amount_list]
+plt.scatter(x=list(range(0, generation_counter.get() + 1)), y=normalized_rain_list)
+plt.title('normalized rain graph')
 plt.show()
 print('-'*50)
 # Average Temperature in cities
